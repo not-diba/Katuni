@@ -182,7 +182,7 @@ fun FloatingBottomBar(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .clickable { onDestinationSelected(index) }
-                        // TODO: This does like a bounce select it looks fun am not sure if I will keep it
+                        // TODO: This does like a bounce effect it looks fun am not sure if I will keep it
                         .animateContentSize()
                 ) {
                     Icon(
