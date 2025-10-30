@@ -41,6 +41,10 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import com.diba.katuni.ui.screens.HighlightsScreen
+import com.diba.katuni.ui.screens.LibraryScreen
+import com.diba.katuni.ui.screens.ReadingNowScreen
+import com.diba.katuni.ui.screens.SettingsScreen
 import com.diba.katuni.ui.theme.KatuniTheme
 
 class MainActivity : ComponentActivity() {
@@ -55,46 +59,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun ReadingNowScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Reading Now Screen")
-    }
-}
-
-@Composable
-fun LibraryScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Library Screen")
-    }
-}
-
-@Composable
-fun HighlightsScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Highlights Screen")
-    }
-}
-
-@Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Settings Screen")
-    }
-}
-
 enum class Destination(
     val route: String,
     val label: String,
@@ -104,12 +68,12 @@ enum class Destination(
     READING_NOW(
         "reading_now",
         "Reading Now",
-        R.drawable.twotone_auto_stories_24,
+        R.drawable.twotone_reading_now,
         "Reading now"
     ),
-    LIBRARY("library", "Library", R.drawable.round_dashboard_24, "Library"),
-    HIGHLIGHTS("highlights", "Highlights", R.drawable.twotone_book_24, "Highlights"),
-    SETTINGS("settings", "Settings", R.drawable.baseline_person_4_24, "Settings"),
+    LIBRARY("library", "Library", R.drawable.dashboard, "Library"),
+    HIGHLIGHTS("highlights", "Highlights", R.drawable.twotone_book, "Highlights"),
+    SETTINGS("settings", "Settings", R.drawable.twotone_person, "Settings"),
 }
 
 @Composable
