@@ -76,6 +76,16 @@ fun LibraryScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun HighlightsScreen(modifier: Modifier = Modifier) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("Highlights Screen")
+    }
+}
+
+@Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -98,6 +108,7 @@ enum class Destination(
         "Reading now"
     ),
     LIBRARY("library", "Library", R.drawable.round_dashboard_24, "Library"),
+    HIGHLIGHTS("highlights", "Highlights", R.drawable.twotone_book_24, "Highlights"),
     SETTINGS("settings", "Settings", R.drawable.baseline_person_4_24, "Settings"),
 }
 
@@ -116,6 +127,7 @@ fun AppNavHost(
                 when (destination) {
                     Destination.READING_NOW -> ReadingNowScreen()
                     Destination.LIBRARY -> LibraryScreen()
+                    Destination.HIGHLIGHTS -> HighlightsScreen()
                     Destination.SETTINGS -> SettingsScreen()
                 }
             }
