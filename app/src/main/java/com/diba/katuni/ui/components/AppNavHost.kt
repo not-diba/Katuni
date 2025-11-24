@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.diba.katuni.ui.screens.HighlightsScreen
-import com.diba.katuni.ui.screens.LibraryScreen
+import com.diba.katuni.ui.screens.library.LibraryScreen
 import com.diba.katuni.ui.screens.ReadingNowScreen
 import com.diba.katuni.ui.screens.SettingsScreen
 
