@@ -1,55 +1,38 @@
 package com.diba.katuni.data.file
 
+import android.content.Context
+import android.net.Uri
 import com.diba.katuni.data.Result
 import com.diba.katuni.model.KatuniFile
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import java.io.File
+import androidx.documentfile.provider.DocumentFile
+
 
 class FileRepositoryImpl : FileRepository {
-    private val favorites = MutableStateFlow<Set<String>>(setOf())
 
-    override suspend fun getFiles(parentFile: File): com.diba.katuni.data.Result<List<KatuniFile>> {
-        val katuniFiles = mutableListOf<KatuniFile>()
+    override suspend fun getFiles(
+        context: Context,
+        uri: Uri
+    ): Result<List<KatuniFile>> {
 
-        val allFiles = parentFile.listFiles()
+        return try {
+            val docFile = DocumentFile.fromTreeUri(context, uri)
+                ?: return Result.Error(Exception("Invalid folder selected"))
 
-        if (allFiles.isNullOrEmpty()) {
-            return Result.Error(IllegalArgumentException("No files found"))
-        }
-
-        allFiles.forEach { file ->
-            file.apply {
-                if (isDirectory && !isHidden) {
-                    getFiles(this)
-                } else {
-                    // TODO: Maybe filter files to only accept (comics: cbz, epub, pdf)
-                    // If you want to filter particular types of files like the pdf|txt|jpg, then with the
-                    // following check, you can check the file extension or multiple kinds of extensions
-                    // if (name.endsWith(".ext")) {
-                    // }
-                    katuniFiles.add(
-                        KatuniFile(
-                            name = name,
-                            modifiedAt = lastModified(),
-                            size = length(),
-                            path = absolutePath
-                        )
+            val files = docFile.listFiles()
+                .filter { it.isFile }
+                .map { df ->
+                    KatuniFile(
+                        name = df.name ?: "Unknown",
+                        modifiedAt = df.lastModified(),
+                        size = df.length(),
+                        path = df.uri.toString()
                     )
                 }
-            }
+
+            Result.Success(files)
+
+        } catch (e: Exception) {
+            Result.Error(e)
         }
-
-        return Result.Success(katuniFiles)
-    }
-
-    override fun observeFavourites(): Flow<Set<String>> = favorites
-
-    override suspend fun toggleFavourite(fileUri: String) {
-        val set = favorites.value.toMutableSet()
-        if (!set.add(fileUri)) {
-            set.remove(fileUri)
-        }
-        favorites.value = set.toSet()
     }
 }
