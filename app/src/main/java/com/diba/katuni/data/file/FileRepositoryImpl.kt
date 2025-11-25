@@ -13,19 +13,19 @@ class FileRepositoryImpl : FileRepository {
         context: Context,
         uri: Uri
     ): Result<List<KatuniFile>> {
-
         return try {
             val docFile = DocumentFile.fromTreeUri(context, uri)
                 ?: return Result.Error(Exception("Invalid folder selected"))
 
             val files = docFile.listFiles()
-                .filter { it.isFile }
+                .filter { it.isFile && isComicFile(it.name) }
                 .map { df ->
                     KatuniFile(
                         name = df.name ?: "Unknown",
                         modifiedAt = df.lastModified(),
                         size = df.length(),
-                        path = df.uri.toString()
+                        path = df.uri.toString(),
+                        mimeType = df.type
                     )
                 }
 
@@ -34,5 +34,14 @@ class FileRepositoryImpl : FileRepository {
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    private fun isComicFile(name: String?): Boolean {
+        if (name == null) return false
+        val lower = name.lowercase()
+        return lower.endsWith(".cbz") ||
+                lower.endsWith(".cbr") ||
+                lower.endsWith(".pdf") ||
+                lower.endsWith(".zip")
     }
 }
