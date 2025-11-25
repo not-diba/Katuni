@@ -20,7 +20,7 @@ class KatuniApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
-        container = AppContainerImpl()
+        container = AppContainerImpl(applicationContext)
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {

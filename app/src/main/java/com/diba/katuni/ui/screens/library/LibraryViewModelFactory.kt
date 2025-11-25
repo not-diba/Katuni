@@ -6,7 +6,10 @@ import com.diba.katuni.KatuniApplication
 
 class LibraryViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val repository = KatuniApplication.container.fileRepository
-        return LibraryScreenViewModel(repository) as T
+        val container = KatuniApplication.container
+        return LibraryScreenViewModel(
+            repository = container.fileRepository,
+            preferencesRepository = container.preferencesRepository
+        ) as T
     }
 }
