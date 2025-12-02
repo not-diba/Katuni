@@ -8,5 +8,7 @@ data class KatuniFile(
     val modifiedAt: Long = 0,
     val size: Long = 0,
     val path: String = "",
-    val mimeType: String? = null
+    val mimeType: String? = null,
+    val coverPage: String? = null,
+    val totalPages: Int = 0
 )

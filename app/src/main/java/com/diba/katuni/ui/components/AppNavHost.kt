@@ -28,22 +28,25 @@ fun AppNavHost(
                     Destination.READING_NOW -> ReadingNowScreen()
                     Destination.LIBRARY -> LibraryScreen(
                         onComicClick = { comic ->
-                            navController.currentBackStackEntry?.savedStateHandle?.set(
-                                "comicPath",
-                                comic.path
-                            )
+                            navController.currentBackStackEntry?.savedStateHandle?.apply {
+                                set("comicPath", comic.path)
+                                set("comicName", comic.name)
+                            }
                             navController.navigate(Destination.COMIC_VIEWER.route)
                         }
                     )
                     Destination.HIGHLIGHTS -> HighlightsScreen()
                     Destination.SETTINGS -> SettingsScreen()
                     Destination.COMIC_VIEWER -> {
-                        val comicPath = navController.previousBackStackEntry
+                        val savedStateHandle = navController.previousBackStackEntry
                             ?.savedStateHandle
-                            ?.get<String>("comicPath") ?: ""
+
+                        val comicPath = savedStateHandle?.get<String>("comicPath") ?: ""
+                        val comicName = savedStateHandle?.get<String>("comicName") ?: ""
 
                         ComicViewerScreen(
                             comicPath = comicPath,
+                            comicName = comicName,
                             onBackClick = { navController.navigateUp() }
                         )
                     }

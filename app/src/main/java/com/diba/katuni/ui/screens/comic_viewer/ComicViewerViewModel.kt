@@ -18,12 +18,12 @@ class ComicViewerViewModel(
     private val _uiState = MutableStateFlow(ComicViewerUiState())
     val uiState: StateFlow<ComicViewerUiState> = _uiState.asStateFlow()
 
-    fun loadComic(context: Context, comicPath: String) {
+    fun loadComic(context: Context, comicPath: String, comicName: String? = null) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 error = null,
-                comicName = comicPath.toUri().lastPathSegment ?: "Comic"
+                comicName = comicName ?: comicPath.toUri().lastPathSegment ?: "Comic"
             )
 
             when (val result = repository.getComicPages(context, comicPath)) {
@@ -33,7 +33,7 @@ class ComicViewerViewModel(
                         totalPages = result.data.size,
                         currentPage = 0,
                         isLoading = false,
-                        comicName = comicPath.toUri().lastPathSegment ?: "Comic"
+                        comicName = comicName ?: comicPath.toUri().lastPathSegment ?: "Comic"
                     )
                 }
                 is Result.Error -> {
