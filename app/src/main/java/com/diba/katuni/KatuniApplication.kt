@@ -24,13 +24,13 @@ class KatuniApplication : Application(), SingletonImageLoader.Factory {
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
-        return ImageLoader.Builder(this)
+        return ImageLoader.Builder(context)
             .components {
                 add(ComicThumbnailFetcher.Factory())
             }
             .memoryCache {
                 MemoryCache.Builder()
-                    .maxSizePercent(this, 0.25)
+                    .maxSizePercent(context, 0.25)
                     .build()
             }
             .diskCache {
