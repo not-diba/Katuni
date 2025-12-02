@@ -8,7 +8,8 @@ import androidx.navigation.compose.composable
 import com.diba.katuni.ui.screens.HighlightsScreen
 import com.diba.katuni.ui.screens.ReadingNowScreen
 import com.diba.katuni.ui.screens.SettingsScreen
-import com.diba.katuni.ui.screens.library.Library
+import com.diba.katuni.ui.screens.comic_viewer.ComicViewerScreen
+import com.diba.katuni.ui.screens.library.LibraryScreen
 
 @Composable
 fun AppNavHost(
@@ -18,15 +19,34 @@ fun AppNavHost(
 ) {
     NavHost(
         navController,
-        startDestination = startDestination.route
+        startDestination = startDestination.route,
+        modifier = modifier
     ) {
         Destination.entries.forEach { destination ->
             composable(destination.route) {
                 when (destination) {
                     Destination.READING_NOW -> ReadingNowScreen()
-                    Destination.LIBRARY -> Library()
+                    Destination.LIBRARY -> LibraryScreen(
+                        onComicClick = { comic ->
+                            navController.currentBackStackEntry?.savedStateHandle?.set(
+                                "comicPath",
+                                comic.path
+                            )
+                            navController.navigate(Destination.COMIC_VIEWER.route)
+                        }
+                    )
                     Destination.HIGHLIGHTS -> HighlightsScreen()
                     Destination.SETTINGS -> SettingsScreen()
+                    Destination.COMIC_VIEWER -> {
+                        val comicPath = navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.get<String>("comicPath") ?: ""
+
+                        ComicViewerScreen(
+                            comicPath = comicPath,
+                            onBackClick = { navController.navigateUp() }
+                        )
+                    }
                 }
             }
         }
