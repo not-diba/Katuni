@@ -11,10 +11,10 @@ import com.diba.katuni.data.file.FileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
 import kotlinx.coroutines.flow.first
+import java.time.temporal.TemporalQuery
 
 class LibraryScreenViewModel(
     private val repository: FileRepository,
@@ -93,6 +93,19 @@ class LibraryScreenViewModel(
                 }
             }
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        val filtered = if (query.isBlank()) {
+            _uiState.value.comics
+        } else {
+            _uiState.value.comics.filter { it.name.contains(query, ignoreCase = true) }
+        }
+
+        _uiState.value = _uiState.value.copy(
+            searchQuery = query,
+            filteredComics = filtered
+        )
     }
 
     fun clearFolder() {

@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.diba.katuni.ui.components.AppNavHost
 import com.diba.katuni.ui.components.Destination
@@ -32,31 +33,36 @@ fun KatuniApp() {
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
-
     val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
 
+    // Track current destination
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+    val showBottomBar = Destination.entries.any {
+        it.route == currentRoute && it.showInBottomBar
+    }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         AppNavHost(navController, startDestination, modifier = Modifier.fillMaxSize())
 
-        FloatingBottomBar(
-            destinations = Destination.entries,
-            selectedIndex = selectedDestination,
-            onDestinationSelected = { index ->
-                navController.navigate(Destination.entries[index].route)
-                selectedDestination = index
-            },
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 32.dp)
-                .shadow(8.dp, RoundedCornerShape(100.dp))
-                .clip(RoundedCornerShape(100.dp))
-                .background(Color.Black)
-                .padding(vertical = 8.dp, horizontal = 16.dp)
-                .align(Alignment.BottomCenter)
-                .width(0.8f * screenWidthDp)
-        )
+        if (showBottomBar) {
+            FloatingBottomBar(
+                destinations = Destination.bottomBarDestinations,
+                selectedIndex = selectedDestination,
+                onDestinationSelected = { index ->
+                    val destination = Destination.bottomBarDestinations[index]
+                    navController.navigate(destination.route)
+                    selectedDestination = index
+                },
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 32.dp)
+                    .shadow(8.dp, RoundedCornerShape(100.dp))
+                    .clip(RoundedCornerShape(100.dp))
+                    .background(Color.Black)
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+                    .align(Alignment.BottomCenter)
+                    .width(0.8f * screenWidthDp)
+            )
+        }
     }
 }
