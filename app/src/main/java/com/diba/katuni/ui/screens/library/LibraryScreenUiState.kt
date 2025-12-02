@@ -7,5 +7,7 @@ data class LibraryScreenUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val error: String? = null,
-    val hasFolder: Boolean = false
+    val hasFolder: Boolean = false,
+    val searchQuery: String = "",
+    val filteredComics: List<KatuniFile> = comics,
 )
