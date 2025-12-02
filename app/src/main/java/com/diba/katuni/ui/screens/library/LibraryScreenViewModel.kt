@@ -11,7 +11,6 @@ import com.diba.katuni.data.file.FileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
 import kotlinx.coroutines.flow.first

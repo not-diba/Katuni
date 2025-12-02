@@ -2,6 +2,7 @@ package com.diba.katuni.ui.screens.library
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,9 +46,11 @@ import coil3.request.crossfade
 import com.diba.katuni.R
 import com.diba.katuni.model.KatuniFile
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
+    onComicClick: (KatuniFile) -> Unit,
     viewModel: LibraryScreenViewModel = viewModel(
         factory = LibraryViewModelFactory()
     )
@@ -112,6 +115,7 @@ fun LibraryScreen(
                     ) {
                         LibraryGrid(
                             comics = uiState.comics,
+                            onComicClick = onComicClick,
                             contentPadding = PaddingValues(8.dp)
                         )
                     }
@@ -122,8 +126,10 @@ fun LibraryScreen(
 }
 
 @Composable
-fun ComicItem(comic: KatuniFile) {
-    Column {
+fun ComicItem(comic: KatuniFile, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -174,10 +180,12 @@ fun ComicItem(comic: KatuniFile) {
         )
     }
 }
+
 @Composable
 fun LibraryGrid(
     comics: List<KatuniFile>,
     modifier: Modifier = Modifier,
+    onComicClick: (KatuniFile) -> Unit,
     contentPadding: PaddingValues
 ) {
     LazyVerticalGrid(
@@ -186,7 +194,7 @@ fun LibraryGrid(
         contentPadding = contentPadding
     ) {
         items(comics, key = { it.path }) { comic ->
-            ComicItem(comic = comic)
+            ComicItem(comic = comic, onClick = { onComicClick(comic)})
         }
     }
 }

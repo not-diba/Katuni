@@ -6,9 +6,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.diba.katuni.ui.screens.HighlightsScreen
-import com.diba.katuni.ui.screens.library.LibraryScreen
 import com.diba.katuni.ui.screens.ReadingNowScreen
 import com.diba.katuni.ui.screens.SettingsScreen
+import com.diba.katuni.ui.screens.library.Library
 
 @Composable
 fun AppNavHost(
@@ -24,7 +24,7 @@ fun AppNavHost(
             composable(destination.route) {
                 when (destination) {
                     Destination.READING_NOW -> ReadingNowScreen()
-                    Destination.LIBRARY -> LibraryScreen()
+                    Destination.LIBRARY -> Library()
                     Destination.HIGHLIGHTS -> HighlightsScreen()
                     Destination.SETTINGS -> SettingsScreen()
                 }

@@ -8,8 +8,8 @@ import com.diba.katuni.model.KatuniFile
 
 interface FileRepository {
     suspend fun getFiles(context: Context, uri: Uri): Result<List<KatuniFile>>
-
-//    fun observeFavourites(): Flow<Set<String>>
-//
-//    suspend fun toggleFavourite(fileUri: String)
+    suspend fun getComicPages(
+        context: Context,
+        comicPath: String
+    ): Result<List<String>>
 }
