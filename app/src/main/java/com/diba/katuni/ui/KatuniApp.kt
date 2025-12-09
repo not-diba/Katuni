@@ -38,9 +38,7 @@ fun KatuniApp() {
     // Track current destination
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
-    val showBottomBar = Destination.entries.any {
-        it.route == currentRoute && it.showInBottomBar
-    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         AppNavHost(navController, startDestination, modifier = Modifier.fillMaxSize())
