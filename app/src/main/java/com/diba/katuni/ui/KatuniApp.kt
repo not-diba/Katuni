@@ -21,10 +21,12 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.diba.katuni.ui.components.AppNavHost
 import com.diba.katuni.ui.components.Destination
 import com.diba.katuni.ui.components.FloatingBottomBar
 import com.diba.katuni.ui.components.bottomBarDestinations
+import com.diba.katuni.ui.screens.comic_viewer.Comic
 
 @Composable
 fun KatuniApp() {
@@ -36,6 +38,15 @@ fun KatuniApp() {
 
     val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val isMainDestination = currentRoute?.let { route ->
+        route.contains("ReadingNow") ||
+                route.contains("Library") ||
+                route.contains("Highlights") ||
+                route.contains("Settings")
+    } ?: false
 
     Box(
         modifier = Modifier
@@ -43,21 +54,23 @@ fun KatuniApp() {
     ) {
         AppNavHost(navController, startDestination, modifier = Modifier.fillMaxSize())
 
-        FloatingBottomBar(
-            destinations = bottomBarDestinations,
-            selectedDestination = selectedDestination,
-            onDestinationSelected = { item ->
-                navController.navigate(item.destination)
-                selectedDestination = item.destination
-            },
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 32.dp)
-                .shadow(8.dp, RoundedCornerShape(100.dp))
-                .clip(RoundedCornerShape(100.dp))
-                .background(Color.Black)
-                .padding(vertical = 8.dp, horizontal = 16.dp)
-                .align(Alignment.BottomCenter)
-                .width(0.8f * screenWidthDp)
-        )
+        if (isMainDestination) {
+            FloatingBottomBar(
+                destinations = bottomBarDestinations,
+                selectedDestination = selectedDestination,
+                onDestinationSelected = { item ->
+                    navController.navigate(item.destination)
+                    selectedDestination = item.destination
+                },
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 32.dp)
+                    .shadow(8.dp, RoundedCornerShape(100.dp))
+                    .clip(RoundedCornerShape(100.dp))
+                    .background(Color.Black)
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+                    .align(Alignment.BottomCenter)
+                    .width(0.8f * screenWidthDp)
+            )
+        }
     }
 }
