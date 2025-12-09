@@ -1,21 +1,19 @@
 package com.diba.katuni.ui.screens.library
 
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -62,7 +60,6 @@ import com.diba.katuni.R
 import com.diba.katuni.model.KatuniFile
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
     onComicClick: (KatuniFile) -> Unit,
@@ -73,14 +70,7 @@ fun LibraryScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    val folderPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        if (uri != null) {
-            viewModel.loadFilesFromUri(context, uri)
-        }
-    }
-    var dropDownExpanded by remember { mutableStateOf(false) }
+
 
     Scaffold { innerPadding ->
         Box(
@@ -115,92 +105,109 @@ fun LibraryScreen(
                         LibraryGrid(
                             comics = uiState.filteredComics,
                             onComicClick = onComicClick,
-                            contentPadding = PaddingValues(
-                                start = 8.dp,
-                                top = 100.dp,
-                                end = 8.dp,
-                                bottom = 8.dp
-                            )
                         )
                     }
                 }
             }
 
-            Row(
+            SearchBarAndFolderSelect(
+                context, uiState, viewModel,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 8.dp)
                     .align(Alignment.TopCenter)
                     .background(Color.Transparent)
-                    .zIndex(1f),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                val colors1 = SearchBarDefaults.colors()
-                SearchBar(
-                    inputField = {
-                        SearchBarDefaults.InputField(
-                            query = uiState.searchQuery,
-                            onQueryChange = { viewModel.updateSearchQuery(it) },
-                            onSearch = { viewModel.updateSearchQuery(uiState.searchQuery) },
-                            expanded = false,
-                            onExpandedChange = { },
-                            placeholder = { Text("Search comics") },
-                            colors = colors1.inputFieldColors,
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(R.drawable.search_icon),
-                                    contentDescription = "Search comics"
-                                )
-                            }
-                        )
-                    },
+                    .zIndex(1f)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBarAndFolderSelect(
+    context: Context,
+    uiState: LibraryScreenUiState,
+    viewModel: LibraryScreenViewModel,
+    modifier: Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        val colors1 = SearchBarDefaults.colors()
+        var dropDownExpanded by remember { mutableStateOf(false) }
+        val folderPicker = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocumentTree()
+        ) { uri ->
+            if (uri != null) {
+                viewModel.loadFilesFromUri(context, uri)
+            }
+        }
+
+        SearchBar(
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = uiState.searchQuery,
+                    onQueryChange = { viewModel.updateSearchQuery(it) },
+                    onSearch = { viewModel.updateSearchQuery(uiState.searchQuery) },
                     expanded = false,
                     onExpandedChange = { },
-                    modifier = Modifier
-                        .weight(1f)
-                        .semantics { isTraversalGroup = false },
-                    shape = SearchBarDefaults.inputFieldShape,
-                    colors = colors1,
-                    tonalElevation = SearchBarDefaults.TonalElevation,
-                    shadowElevation = SearchBarDefaults.ShadowElevation,
-                    windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
-                    content = { },
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Box {
-                    IconButton(
-                        onClick = { dropDownExpanded = !dropDownExpanded },
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(
-                                color = Color.White,
-                                shape = CircleShape
-                            )
-                    ) {
+                    placeholder = { Text("Search comics") },
+                    colors = colors1.inputFieldColors,
+                    leadingIcon = {
                         Icon(
-                            painter = painterResource(R.drawable.filter_icon),
-                            contentDescription = "List of available options",
-                            tint = Color.Black
+                            painter = painterResource(R.drawable.search_icon),
+                            contentDescription = "Search comics"
                         )
                     }
-                    DropdownMenu(
-                        expanded = dropDownExpanded,
-                        onDismissRequest = { dropDownExpanded = false },
-                        offset = DpOffset(x = (-8).dp, y = 8.dp),
-                        modifier = Modifier.padding(end = 24.dp)
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(if (uiState.hasFolder) "Change folder" else "Select folder") },
-                            onClick = { folderPicker.launch(null) }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Clear Folder") },
-                            onClick = { viewModel.clearFolder() }
-                        )
-                    }
-                }
+                )
+            },
+            expanded = false,
+            onExpandedChange = { },
+            modifier = Modifier
+                .weight(1f)
+                .semantics { isTraversalGroup = false },
+            shape = SearchBarDefaults.inputFieldShape,
+            colors = colors1,
+            tonalElevation = SearchBarDefaults.TonalElevation,
+            shadowElevation = SearchBarDefaults.ShadowElevation,
+            windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp),
+            content = { },
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Box {
+            IconButton(
+                onClick = { dropDownExpanded = !dropDownExpanded },
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        color = Color.White,
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.filter_icon),
+                    contentDescription = "List of available options",
+                    tint = Color.Black
+                )
+            }
+            DropdownMenu(
+                expanded = dropDownExpanded,
+                onDismissRequest = { dropDownExpanded = false },
+                offset = DpOffset(x = (-8).dp, y = 8.dp),
+                modifier = Modifier.padding(end = 24.dp)
+            ) {
+                DropdownMenuItem(
+                    text = { Text(if (uiState.hasFolder) "Change folder" else "Select folder") },
+                    onClick = { folderPicker.launch(null) }
+                )
+                DropdownMenuItem(
+                    text = { Text("Clear Folder") },
+                    onClick = { viewModel.clearFolder() }
+                )
             }
         }
     }
@@ -267,20 +274,19 @@ fun LibraryGrid(
     comics: List<KatuniFile>,
     modifier: Modifier = Modifier,
     onComicClick: (KatuniFile) -> Unit,
-    contentPadding: PaddingValues
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(top = 100.dp, bottom = 150.dp),
         modifier = modifier,
-        contentPadding = PaddingValues(
-            start = 8.dp,
-            top = 100.dp,
-            end = 8.dp,
-            bottom = 8.dp
-        )
-    ) {
+
+        ) {
         items(comics, key = { it.path }) { comic ->
             ComicItem(comic = comic, onClick = { onComicClick(comic) })
         }
     }
 }
+
+
