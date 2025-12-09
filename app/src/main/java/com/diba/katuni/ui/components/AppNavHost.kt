@@ -20,37 +20,42 @@ fun AppNavHost(
     modifier: Modifier = Modifier
 ) {
     NavHost(
-        navController,
-        startDestination = startDestination.route,
+        navController = navController,
+        startDestination = startDestination,
         modifier = modifier
     ) {
-        Destination.entries.forEach { destination ->
-            composable(destination.route) {
-                when (destination) {
-                    Destination.READING_NOW -> ReadingNowScreen()
-                    Destination.LIBRARY -> LibraryScreen(
-                        onComicClick = { comic ->
-                            navController.navigate(
-                                route = Comic(
-                                    comicName = comic.name,
-                                    comicPath = comic.path
-                                )
-                            )
-                        }
-                    )
+        composable<Destination.ReadingNow> {
+            ReadingNowScreen()
+        }
 
-                    Destination.HIGHLIGHTS -> HighlightsScreen()
-                    Destination.SETTINGS -> SettingsScreen()
+        composable<Destination.Library> {
+            LibraryScreen(
+                onComicClick = { comic ->
+                    navController.navigate(
+                        Comic(
+                            comicName = comic.name,
+                            comicPath = comic.path
+                        )
+                    )
                 }
-            }
-            composable<Comic> { backStackEntry ->
-                val comic: Comic = backStackEntry.toRoute()
-                ComicViewerScreen(
-                    comicName = comic.comicName,
-                    comicPath = comic.comicPath,
-                    onBackClick = { navController.navigateUp() }
-                )
-            }
+            )
+        }
+
+        composable<Destination.Highlights> {
+            HighlightsScreen()
+        }
+
+        composable<Destination.Settings> {
+            SettingsScreen()
+        }
+
+        composable<Comic> { backStackEntry ->
+            val comic: Comic = backStackEntry.toRoute()
+            ComicViewerScreen(
+                comicName = comic.comicName,
+                comicPath = comic.comicPath,
+                onBackClick = { navController.navigateUp() }
+            )
         }
     }
 }

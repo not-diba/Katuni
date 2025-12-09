@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,17 +20,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.diba.katuni.ui.components.AppNavHost
 import com.diba.katuni.ui.components.Destination
 import com.diba.katuni.ui.components.FloatingBottomBar
+import com.diba.katuni.ui.components.bottomBarDestinations
 
 @Composable
 fun KatuniApp() {
     val navController = rememberNavController()
-    val startDestination = Destination.READING_NOW
-    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+    val startDestination = Destination.ReadingNow
+    var selectedDestination by remember { mutableStateOf<Destination>(startDestination) }
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
 
@@ -44,11 +44,11 @@ fun KatuniApp() {
         AppNavHost(navController, startDestination, modifier = Modifier.fillMaxSize())
 
         FloatingBottomBar(
-            destinations = Destination.entries,
-            selectedIndex = selectedDestination,
-            onDestinationSelected = { index ->
-                navController.navigate(Destination.entries[index].route)
-                selectedDestination = index
+            destinations = bottomBarDestinations,
+            selectedDestination = selectedDestination,
+            onDestinationSelected = { item ->
+                navController.navigate(item.destination)
+                selectedDestination = item.destination
             },
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 32.dp)
