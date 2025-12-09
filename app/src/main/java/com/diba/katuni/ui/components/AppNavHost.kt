@@ -30,11 +30,6 @@ fun AppNavHost(
                     Destination.READING_NOW -> ReadingNowScreen()
                     Destination.LIBRARY -> LibraryScreen(
                         onComicClick = { comic ->
-//                            navController.currentBackStackEntry?.savedStateHandle?.apply {
-//                                set("comicPath", comic.path)
-//                                set("comicName", comic.name)
-//                            }
-//                            navController.navigate(Destination.COMIC_VIEWER.route)
                             navController.navigate(
                                 route = Comic(
                                     comicName = comic.name,
@@ -46,19 +41,6 @@ fun AppNavHost(
 
                     Destination.HIGHLIGHTS -> HighlightsScreen()
                     Destination.SETTINGS -> SettingsScreen()
-//                    Destination.COMIC_VIEWER -> {
-//                        val savedStateHandle = navController.previousBackStackEntry
-//                            ?.savedStateHandle
-//
-//                        val comicPath = savedStateHandle?.get<String>("comicPath") ?: ""
-//                        val comicName = savedStateHandle?.get<String>("comicName") ?: ""
-//
-//                        ComicViewerScreen(
-//                            comicPath = comicPath,
-//                            comicName = comicName,
-//                            onBackClick = { navController.navigateUp() }
-//                        )
-//                    }
                 }
             }
             composable<Comic> { backStackEntry ->
