@@ -1,4 +1,4 @@
-package com.diba.katuni.ui.components
+package com.diba.katuni.data.file
 
 import androidx.core.net.toUri
 import coil3.ImageLoader
@@ -8,10 +8,9 @@ import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.ImageFetchResult
 import coil3.request.Options
-import com.diba.katuni.data.file.ThumbnailExtractor
 import com.diba.katuni.model.KatuniFile
 
-class ComicThumbnailFetcher(
+class ThumbnailFetcher(
     private val data: KatuniFile,
     private val options: Options
 ) : Fetcher {
@@ -37,7 +36,7 @@ class ComicThumbnailFetcher(
             options: Options,
             imageLoader: ImageLoader
         ): Fetcher {
-            return ComicThumbnailFetcher(data, options)
+            return ThumbnailFetcher(data, options)
         }
     }
 }

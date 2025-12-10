@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.diba.katuni.R
@@ -215,6 +215,8 @@ fun SearchBarAndFolderSelect(
 
 @Composable
 fun ComicItem(comic: KatuniFile, onClick: () -> Unit) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier.clickable(onClick = onClick)
     ) {
@@ -226,39 +228,17 @@ fun ComicItem(comic: KatuniFile, onClick: () -> Unit) {
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
+            AsyncImage(
+                model = ImageRequest.Builder(context)
                     .data(comic)
-                    .crossfade(true)
                     .memoryCacheKey(comic.path)
                     .diskCacheKey(comic.path)
+                    .placeholderMemoryCacheKey(comic.path)
+                    .crossfade(200)
                     .build(),
                 contentDescription = comic.name,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-                loading = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                },
-                error = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.twotone_clear),
-                            contentDescription = "Failed to load",
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                contentScale = ContentScale.Fit
             )
         }
         Text(
@@ -283,7 +263,7 @@ fun LibraryGrid(
         modifier = modifier,
 
         ) {
-        items(comics, key = { it.path }) { comic ->
+        items(comics, key = { it.path }, contentType = { "grid_item" }) { comic ->
             ComicItem(comic = comic, onClick = { onComicClick(comic) })
         }
     }
