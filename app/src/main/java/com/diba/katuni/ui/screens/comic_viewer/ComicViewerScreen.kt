@@ -129,39 +129,48 @@ fun ComicViewerScreen(
                     }
                 }
             }
-
-            Row(
+            BackButtonAndTitle(
+                uiState,
+                onBackClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopStart)
-                    .padding(16.dp),
-            ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            color = Color.White,
-                            shape = CircleShape
-                        )
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.back_icon),
-                        contentDescription = "Go back",
-                        tint = Color.Black
-                    )
-                }
-                Spacer(
-                    modifier = Modifier.width(12.dp)
-                )
-                Text(
-                    text = uiState.comicName,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-            }
+                    .padding(16.dp)
+            )
+
         }
+    }
+}
+
+@Composable
+fun BackButtonAndTitle(uiState: ComicViewerUiState, onBackClick: () -> Unit, modifier: Modifier) {
+    Row(
+        modifier = modifier,
+    ) {
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    color = Color.White,
+                    shape = CircleShape
+                )
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.back_icon),
+                contentDescription = "Go back",
+                tint = Color.Black
+            )
+        }
+        Spacer(
+            modifier = Modifier.width(12.dp)
+        )
+        Text(
+            text = uiState.comicName,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
     }
 }
