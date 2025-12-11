@@ -56,60 +56,174 @@ class FileRepositoryImpl : FileRepository {
         comicPath: String
     ): Result<List<String>> = withContext(Dispatchers.IO) {
         try {
-            val pages = mutableListOf<Pair<String, String>>() // name, path
+            val uri = comicPath.toUri()
+            val mimeType = context.contentResolver.getType(uri)
 
-            context.contentResolver.openInputStream(comicPath.toUri())?.use { input ->
-                ZipInputStream(input).use { zip ->
-                    var entry = zip.nextEntry
-
-                    while (entry != null) {
-                        val entryName = entry.name
-                        val lowerName = entryName.lowercase()
-
-                        // Check if it's an image file
-                        if (!entry.isDirectory &&
-                            (lowerName.endsWith(".jpg") ||
-                                    lowerName.endsWith(".jpeg") ||
-                                    lowerName.endsWith(".png") ||
-                                    lowerName.endsWith(".webp") ||
-                                    lowerName.endsWith(".bmp"))) {
-
-                            // Create cache directory for this comic
-                            val comicHash = comicPath.hashCode().toString()
-                            val cacheDir = File(
-                                context.cacheDir,
-                                "comic_pages/$comicHash"
-                            )
-                            cacheDir.mkdirs()
-
-                            // Save page to cache
-                            val pageFile = File(cacheDir, entryName)
-                            pageFile.parentFile?.mkdirs()
-
-                            FileOutputStream(pageFile).use { output ->
-                                zip.copyTo(output)
-                            }
-
-                            pages.add(entryName to pageFile.absolutePath)
-                        }
-
-                        entry = zip.nextEntry
-                    }
+            // Check if it's a PDF
+            if (mimeType?.contains("pdf") == true || comicPath.lowercase().endsWith(".pdf")) {
+                // For PDFs, get page count and create placeholder paths
+                val pageCount = PdfPageRenderer.getPdfPageCount(context, uri)
+                if (pageCount == 0) {
+                    return@withContext Result.Error(Exception("Invalid PDF or no pages found"))
                 }
+
+                // Return placeholder paths - pages will be rendered on demand
+                val pagePaths = (0 until pageCount).map { pageIndex ->
+                    PdfPageRenderer.getPagePath(context, uri, pageIndex)
+                }
+
+                return@withContext Result.Success(pagePaths)
+            } else {
+                // For CBZ/ZIP, get the list of image entries first (fast)
+                // Then extract them progressively
+                return@withContext getCbzPageList(context, comicPath)
             }
-
-            // Sort pages naturally (handles page1, page2, ..., page10 correctly)
-            val sortedPages = pages.sortedWith(
-                compareBy { it.first.naturalOrder() }
-            ).map { it.second }
-
-            Result.Success(sortedPages)
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
 
+    /**
+     * Gets the list of image files in a CBZ without extracting them
+     * Returns placeholder paths that will be extracted on demand
+     */
+    private suspend fun getCbzPageList(
+        context: Context,
+        comicPath: String
+    ): Result<List<String>> = withContext(Dispatchers.IO) {
+        try {
+            val imageEntries = mutableListOf<String>()
 
+            // First pass: collect all image entry names
+            context.contentResolver.openInputStream(comicPath.toUri())?.use { input ->
+                ZipInputStream(input).use { zip ->
+                    var entry = zip.nextEntry
+
+                    while (entry != null) {
+                        if (!entry.isDirectory && isImageFile(entry.name)) {
+                            imageEntries.add(entry.name)
+                        }
+                        entry = zip.nextEntry
+                    }
+                }
+            }
+
+            // Sort entries naturally
+            val sortedEntries = imageEntries.sortedWith(
+                compareBy { it.naturalOrder() }
+            )
+
+            // Create placeholder paths
+            val comicHash = comicPath.hashCode().toString()
+            val cacheDir = File(context.cacheDir, "comic_pages/$comicHash")
+
+            val pagePaths = sortedEntries.map { entryName ->
+                File(cacheDir, entryName).absolutePath
+            }
+
+            Result.Success(pagePaths)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    /**
+     * Renders a batch of PDF pages progressively
+     */
+    override suspend fun renderPdfPageBatch(
+        context: Context,
+        comicPath: String,
+        startPage: Int,
+        count: Int
+    ): Result<List<String>> = withContext(Dispatchers.IO) {
+        try {
+            val uri = comicPath.toUri()
+            val renderedPages = PdfPageRenderer.renderPageBatch(context, uri, startPage, count)
+            Result.Success(renderedPages)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    /**
+     * Extracts a batch of CBZ pages progressively
+     */
+    override suspend fun extractCbzPageBatch(
+        context: Context,
+        comicPath: String,
+        startPage: Int,
+        count: Int
+    ): Result<List<String>> = withContext(Dispatchers.IO) {
+        try {
+            val comicHash = comicPath.hashCode().toString()
+            val cacheDir = File(context.cacheDir, "comic_pages/$comicHash")
+            cacheDir.mkdirs()
+
+            // Get sorted list of all image entries
+            val allEntries = mutableListOf<String>()
+            context.contentResolver.openInputStream(comicPath.toUri())?.use { input ->
+                ZipInputStream(input).use { zip ->
+                    var entry = zip.nextEntry
+                    while (entry != null) {
+                        if (!entry.isDirectory && isImageFile(entry.name)) {
+                            allEntries.add(entry.name)
+                        }
+                        entry = zip.nextEntry
+                    }
+                }
+            }
+
+            val sortedEntries = allEntries.sortedWith(compareBy { it.naturalOrder() })
+
+            // Determine which entries to extract in this batch
+            val endPage = minOf(startPage + count, sortedEntries.size)
+            val entriesToExtract = sortedEntries.subList(startPage, endPage)
+
+            val extractedPaths = mutableListOf<String>()
+
+            // Second pass: extract only the needed entries
+            context.contentResolver.openInputStream(comicPath.toUri())?.use { input ->
+                ZipInputStream(input).use { zip ->
+                    var entry = zip.nextEntry
+
+                    while (entry != null) {
+                        if (entry.name in entriesToExtract) {
+                            val pageFile = File(cacheDir, entry.name)
+
+                            // Skip if already extracted
+                            if (!pageFile.exists()) {
+                                pageFile.parentFile?.mkdirs()
+                                FileOutputStream(pageFile).use { output ->
+                                    zip.copyTo(output)
+                                }
+                            }
+
+                            extractedPaths.add(pageFile.absolutePath)
+                        }
+                        entry = zip.nextEntry
+                    }
+                }
+            }
+
+            // Sort the extracted paths to match the original order
+            val sortedPaths = extractedPaths.sortedWith(
+                compareBy { File(it).name.naturalOrder() }
+            )
+
+            Result.Success(sortedPaths)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    private fun isImageFile(name: String): Boolean {
+        val lower = name.lowercase()
+        return lower.endsWith(".jpg") ||
+                lower.endsWith(".jpeg") ||
+                lower.endsWith(".png") ||
+                lower.endsWith(".webp") ||
+                lower.endsWith(".bmp")
+    }
 }
 
 // Helper extension for natural sorting

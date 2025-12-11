@@ -85,9 +85,16 @@ fun ComicViewerScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(color = Color.White)
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("Loading comic pages...")
+                            Text(
+                                text = when (uiState.fileType) {
+                                    FileType.PDF -> "Preparing PDF..."
+                                    FileType.CBZ -> "Preparing comic..."
+                                    else -> "Loading..."
+                                },
+                                color = Color.White
+                            )
                         }
                     }
                 }
@@ -120,7 +127,8 @@ fun ComicViewerScreen(
                 uiState.pages.isNotEmpty() -> {
                     HorizontalPager(
                         state = pagerState,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        beyondViewportPageCount = 1 // Preload 1 page ahead
                     ) { pageIndex ->
                         ComicPage(
                             pagePath = uiState.pages[pageIndex],
@@ -129,23 +137,33 @@ fun ComicViewerScreen(
                     }
                 }
             }
-            BackButtonAndTitle(
-                uiState,
-                onBackClick,
+
+            // Page indicator and back button
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopStart)
                     .padding(16.dp)
-            )
+            ) {
+                BackButtonAndTitle(uiState, onBackClick)
 
+                if (uiState.totalPages > 0 && !uiState.isLoading) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Page ${uiState.currentPage + 1} of ${uiState.totalPages}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun BackButtonAndTitle(uiState: ComicViewerUiState, onBackClick: () -> Unit, modifier: Modifier) {
+fun BackButtonAndTitle(uiState: ComicViewerUiState, onBackClick: () -> Unit) {
     Row(
-        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             onClick = onBackClick,
@@ -162,15 +180,13 @@ fun BackButtonAndTitle(uiState: ComicViewerUiState, onBackClick: () -> Unit, mod
                 tint = Color.Black
             )
         }
-        Spacer(
-            modifier = Modifier.width(12.dp)
-        )
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = uiState.comicName,
             color = Color.White,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier.weight(1f)
         )
     }
 }
