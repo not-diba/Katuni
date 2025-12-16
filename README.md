@@ -43,10 +43,6 @@ Here are a couple of screens and videos of my work on the app so far:
 ### Videos of the App
 
 ![library screen](./library_screen.webp)
-![Comic reader screen](./details_screes.webp)
-
-![Library Screen Video](./library_view.webm)
-![Reading Screen Video](./reading_comics.webm)
-![Search and other screens](./search_and_other_screens.webm)
+![Comic reader screen](./details_screen.webp)
 
 ---
