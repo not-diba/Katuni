@@ -12,4 +12,17 @@ interface FileRepository {
         context: Context,
         comicPath: String
     ): Result<List<String>>
+    suspend fun renderPdfPageBatch(
+        context: Context,
+        comicPath: String,
+        startPage: Int,
+        count: Int
+    ): Result<List<String>>
+
+    suspend fun extractCbzPageBatch(
+        context: Context,
+        comicPath: String,
+        startPage: Int,
+        count: Int
+    ): Result<List<String>>
 }

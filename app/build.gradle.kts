@@ -42,16 +42,13 @@ android {
 
 dependencies {
     implementation(libs.androidx.material3)
-    val lifecycle_version = "2.10.0"
-
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
-    implementation("androidx.documentfile:documentfile:1.1.0")
-    implementation("io.coil-kt.coil3:coil-compose:3.0.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.0.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("androidx.compose.material3:material3:1.3.1")
-    implementation("androidx.navigation:navigation-compose:2.9.6")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.documentfile)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.compose.material3.v131)
+    implementation(libs.androidx.navigation.compose)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
